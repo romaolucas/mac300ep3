@@ -41,7 +41,7 @@ C       ARRAY ARGUMENTS
 
 C       LOCAL SCALARS
 
-        double precision innerprod, t, gama, maxv
+        double precision innerprod, t, gama, maxv, aux
         integer i, j, k, iMax
         double precision norm(m)
         double precision EPS
@@ -64,6 +64,39 @@ C       CALCULO DAS NORMAS
 
 C       DECOMPOSICAO QR
         do k = 1, m
+
+C       NORMAS ATUALIZADAS
+            do j = k, m
+                norm(j) = norm(j) ** 2
+                do i = 1, k-1
+                    norm(j) = norm(j) - A(i, j)**2
+                end do
+                norm(j) = sqrt(norm(j))
+            end do
+
+C       PERMUTACOES
+            do j = k, m
+                maxv = 0
+                if (abs(norm(j)) > maxv) then
+                    maxv = abs(norm(j))
+                    iMax = j
+                end if
+            end do
+
+            do i = 1, n
+                aux = A(i, k)
+                A(i, k) = A(i, iMax)
+                A(i, iMax) = aux
+            end do
+
+            aux = norm(k)
+            norm(k) = norm(iMax)
+            norm(iMax) = aux
+
+            aux = p(k)
+            p(k) = p(iMax)
+            p(iMax) = aux
+
 C       ACHAR O REFLETOR
             t = 0        
             maxv = 0
@@ -85,8 +118,12 @@ C       ACHAR O REFLETOR
                 if (A(k, k) < 0) then
                     t = -t
                 end if
+                if (abs(t) < EPS) then
+                    exit
+                end if
                 A(k, k) = A(k, k) + t
                 gama = A(k, k)/t
+                write (*, *) 'gama = ', gama
                 do i = (k + 1), n
                    A(i, k) = A(i, k)/A(k, k)
                 end do
