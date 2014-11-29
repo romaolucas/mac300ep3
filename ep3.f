@@ -18,6 +18,12 @@
             read (7, *) i, b(i)
         end do
         hue = qrdecomp(n, m, NMAX, A, p)
+        write (*, *) 'Pronto'
+        do i = 1, n
+            do j = 1, m
+                write (*, *) A(i, j)
+            end do
+        end do
         stop
         end
 
@@ -35,8 +41,8 @@ C       ARRAY ARGUMENTS
 
 C       LOCAL SCALARS
 
-        double precision innerprod, t, gama
-        integer i, j, k, maxv, iMax
+        double precision innerprod, t, gama, maxv
+        integer i, j, k, iMax
         double precision norm(m)
         double precision EPS
         parameter (EPS = 0.0000001)
@@ -58,7 +64,6 @@ C       CALCULO DAS NORMAS
 
 C       DECOMPOSICAO QR
         do k = 1, m
-
 C       ACHAR O REFLETOR
             t = 0        
             maxv = 0
@@ -69,7 +74,7 @@ C       ACHAR O REFLETOR
             end do
             if (maxv == 0) then
                 gama = 0
-            else 
+            else
                 do i = k, n
                     A(i, k) = A(i, k)/maxv
                 end do
@@ -83,12 +88,26 @@ C       ACHAR O REFLETOR
                 A(k, k) = A(k, k) + t
                 gama = A(k, k)/t
                 do i = (k + 1), n
-                    A(i, k) = A(i, k)/A(k, k)
+                   A(i, k) = A(i, k)/A(k, k)
                 end do
                 A(k, k) = 1
                 t = t*maxv
             end if
 C       FAZER Q^(K)*A^(K)
+            do j = (k + 1), m
+                innerprod = 0
+                do i = k, n
+                    write (*, *) 'A(i, j), i, j, k, A(i, k)'
+                    write (*, *) A(i, j), i, j, k, A(i, k)
+                    innerprod = innerprod + A(i, j)*A(i, k)
+                end do
+                innerprod = innerprod*gama
+                write (*, *) innerprod
+                do i = k, n
+                    A(i, j) = A(i, j) - A(i, k)*innerprod
+                end do
+            end do
+            A(k, k) = -t
         end do
         return
         end
