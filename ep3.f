@@ -63,19 +63,10 @@ C       CALCULO DAS NORMAS
         end do
 
 C       DECOMPOSICAO QR
-        do k = 1, m
-
-C       NORMAS ATUALIZADAS
-            do j = k, m
-                norm(j) = norm(j) ** 2
-                do i = 1, k-1
-                    norm(j) = norm(j) - A(i, j)**2
-                end do
-                norm(j) = sqrt(norm(j))
-            end do
+        do k = 1, (m - 1)
 
 C       PERMUTACOES
-            do j = k, m
+            do j = k , m
                 maxv = 0
                 if (abs(norm(j)) > maxv) then
                     maxv = abs(norm(j))
@@ -138,13 +129,22 @@ C       FAZER Q^(K)*A^(K)
                     write (*, *) A(i, j), i, j, k, A(i, k)
                     innerprod = innerprod + A(i, j)*A(i, k)
                 end do
+                write (*, *) 'j, innerprod', j, innerprod
                 innerprod = innerprod*gama
                 write (*, *) innerprod
                 do i = k, n
                     A(i, j) = A(i, j) - A(i, k)*innerprod
                 end do
+                do i = k, n
+                    write (*, *) A(i , j)
+                end do
             end do
             A(k, k) = -t
+C       NORMAS ATUALIZADAS
+            do j = (k + 1), m
+                norm(j) = norm(j) ** 2
+                norm(j) = norm(j) - A(k, j) ** 2
+            end do
         end do
         return
         end
