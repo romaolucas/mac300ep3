@@ -14,7 +14,7 @@
         do  k = 1, n*m
             read (7, *) i, j, A(i, j)
         end do
-        do k = 1, m
+        do k = 1, n
             read (7, *) i, b(i)
         end do
         hue = qrdecomp(n, m, NMAX, A, p)
