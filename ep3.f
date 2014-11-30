@@ -4,7 +4,7 @@
         integer qrdecomp, lssolve, r
         parameter (NMAX = 700)
         character fInput*128
-        double precision A(NMAX, NMAX), b(NMAX)
+        double precision A(NMAX, NMAX), b(NMAX), gama(NMAX)
         integer p(NMAX)
         
         write (*, *) 'Digite o nome do arquivo:'
@@ -17,7 +17,7 @@
         do k = 1, n
             read (7, *) i, b(i)
         end do
-        r = qrdecomp(n, m, NMAX, A, p)
+        r = qrdecomp(n, m, NMAX, A, p, gama)
         write (*, *) 'Pronto'
         write (*, *) 'Posto de A: ', r
         do i = 1, n
@@ -28,7 +28,7 @@
         stop
         end
 
-        integer function qrdecomp(n, m, lda, A, p)
+        integer function qrdecomp(n, m, lda, A, p, gama)
         implicit none
 
 C       SCALAR ARGUMENTS
@@ -37,12 +37,12 @@ C       SCALAR ARGUMENTS
 
 C       ARRAY ARGUMENTS
 
-        double precision A(lda, m)
+        double precision A(lda, m), gama(m)
         integer p(m)
 
 C       LOCAL SCALARS
 
-        double precision innerprod, t, gama, maxv, aux
+        double precision innerprod, t, maxv, aux
         integer i, j, k, iMax
         double precision norm(m)
         double precision EPS
@@ -98,7 +98,7 @@ C       ACHAR O REFLETOR
                 end if
             end do
             if (maxv == 0) then
-                gama = 0
+                gama(k) = 0
             else
                 do i = k, n
                     A(i, k) = A(i, k)/maxv
@@ -118,7 +118,7 @@ C       ACHAR O REFLETOR
                     exit
                 end if
                 A(k, k) = A(k, k) + t
-                gama = A(k, k)/t
+                gama(k) = A(k, k)/t
                 do i = (k + 1), n
                    A(i, k) = A(i, k)/A(k, k)
                 end do
@@ -133,7 +133,7 @@ C       FAZER Q^(K)*A^(K)
                     write (*, *) A(i, j), i, j, k, A(i, k)
                     innerprod = innerprod + A(i, j)*A(i, k)
                 end do
-                innerprod = innerprod*gama
+                innerprod = innerprod*gama(k)
                 write (*, *) innerprod
                 do i = k, n
                     A(i, j) = A(i, j) - A(i, k)*innerprod
