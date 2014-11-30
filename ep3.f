@@ -1,7 +1,7 @@
         program ep3F
         implicit none
         integer i, j, k, n, m, NMAX
-        integer qrdecomp, lssolve, r
+        integer qrdecomp, lssolve, r, fim
         parameter (NMAX = 700)
         character fInput*128
         double precision A(NMAX, NMAX), b(NMAX), gama(NMAX)
@@ -25,6 +25,8 @@
                 write (*, *) A(i, j)
             end do
         end do
+
+        fim = lssolve(n, m, NMAX, r, A, b, p, gama)
         stop
         end
 
@@ -148,5 +150,67 @@ C       NORMAS ATUALIZADAS
                 norm(j) = norm(j) - A(k, j) ** 2
             end do
         end do
+        return
+        end
+
+
+        integer function lssolve(n, m, lda, rank, A, b, p, gama)
+        implicit none
+
+C       SCALAR ARGUMENTS
+
+        integer n, m, lda, rank
+
+C       ARRAY ARGUMENTS
+
+        double precision A(lda, m), gama(m), b(n)
+        integer p(m)
+
+C       LOCAL SCALARS
+
+        double precision innerprod
+        integer i, j, k
+
+        lssolve = 0
+C       FAZER Q^(K)*A^(K)
+        do k = rank, 1, -1
+            innerprod = 0
+            do i = k, n
+                write (*, *) 'b(i), i, k, A(i, k)'
+                write (*, *) b(i), i, k, A(i, k)
+                innerprod = innerprod + b(i)*A(i, k)
+            end do
+            innerprod = innerprod*gama(k)
+            write (*, *) innerprod
+            do i = k, n
+                b(i) = b(i) - A(i, k)*innerprod
+            end do
+            do i = k, n
+                write (*, *) b(i)
+            end do
+        end do
+
+C       TRANSFORMAR A(1:RANK, 1:RANK) EM R_11
+        write(*,*), "A(1:rank, 1:rank):"
+        do i = 1, rank
+            do j = 1, rank
+                if (i > j) then
+                    A(i, j) = 0
+                end if
+                write(*,*), A(i,j)
+            end do
+        end do
+
+C       RESOLVER O SISTEMA
+        do j = rank, 1, -1
+            b(j) = b(j) / A(j, j)
+            do i = 1, j-1
+                b(i) = b(i) - A(i, j) * b(j)
+            end do
+        end do
+
+        write(*,*), "x = ", b(1:rank)
+
+
         return
         end
