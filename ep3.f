@@ -1,7 +1,7 @@
         program ep3F
         implicit none
         integer i, j, k, n, m, NMAX
-        integer qrdecomp, lssolve, hue
+        integer qrdecomp, lssolve, r
         parameter (NMAX = 700)
         character fInput*128
         double precision A(NMAX, NMAX), b(NMAX)
@@ -17,8 +17,9 @@
         do k = 1, n
             read (7, *) i, b(i)
         end do
-        hue = qrdecomp(n, m, NMAX, A, p)
+        r = qrdecomp(n, m, NMAX, A, p)
         write (*, *) 'Pronto'
+        write (*, *) 'Posto de A: ', r
         do i = 1, n
             do j = 1, m
                 write (*, *) A(i, j)
@@ -47,7 +48,7 @@ C       LOCAL SCALARS
         double precision EPS
         parameter (EPS = 0.0000001)
 
-        qrdecomp = 0
+        qrdecomp = m 
 
 C       CALCULO DAS NORMAS
         do j = 1, m
@@ -63,7 +64,7 @@ C       CALCULO DAS NORMAS
         end do
 
 C       DECOMPOSICAO QR
-        do k = 1, (m - 1)
+        do k = 1, m
 
 C       PERMUTACOES
             do j = k , m
@@ -109,12 +110,15 @@ C       ACHAR O REFLETOR
                 if (A(k, k) < 0) then
                     t = -t
                 end if
-                if (abs(t) < EPS) then
+                if (abs(t*maxv) < EPS) then
+                    do i = k, n
+                        A(i, k) = A(i, k)*maxv
+                    end do
+                    qrdecomp = k - 1
                     exit
                 end if
                 A(k, k) = A(k, k) + t
                 gama = A(k, k)/t
-                write (*, *) 'gama = ', gama
                 do i = (k + 1), n
                    A(i, k) = A(i, k)/A(k, k)
                 end do
@@ -129,7 +133,6 @@ C       FAZER Q^(K)*A^(K)
                     write (*, *) A(i, j), i, j, k, A(i, k)
                     innerprod = innerprod + A(i, j)*A(i, k)
                 end do
-                write (*, *) 'j, innerprod', j, innerprod
                 innerprod = innerprod*gama
                 write (*, *) innerprod
                 do i = k, n
@@ -142,7 +145,6 @@ C       FAZER Q^(K)*A^(K)
             A(k, k) = -t
 C       NORMAS ATUALIZADAS
             do j = (k + 1), m
-                norm(j) = norm(j) ** 2
                 norm(j) = norm(j) - A(k, j) ** 2
             end do
         end do
