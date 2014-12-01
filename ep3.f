@@ -173,16 +173,17 @@ C       LOCAL SCALARS
 
         lssolve = 0
 C       FAZER Q^(K)*A^(K)
-        do k = rank, 1, -1
-            innerprod = 0
-            do i = k, n
+        do k = 1, rank
+            innerprod = b(k)
+            do i = (k + 1), n
                 write (*, *) 'b(i), i, k, A(i, k)'
                 write (*, *) b(i), i, k, A(i, k)
                 innerprod = innerprod + b(i)*A(i, k)
             end do
             innerprod = innerprod*gama(k)
             write (*, *) innerprod
-            do i = k, n
+            b(k) = b(k) - innerprod
+            do i = (k + 1), n
                 b(i) = b(i) - A(i, k)*innerprod
             end do
             do i = k, n
