@@ -87,9 +87,7 @@ C       PERMUTACOES
             norm(k) = norm(iMax)
             norm(iMax) = aux
 
-            aux = p(k)
-            p(k) = p(iMax)
-            p(iMax) = aux
+            p(k) = iMax
 
 C       ACHAR O REFLETOR
             t = 0        
@@ -168,7 +166,7 @@ C       ARRAY ARGUMENTS
 
 C       LOCAL SCALARS
 
-        double precision innerprod
+        double precision innerprod, d, aux
         integer i, j, k
 
         lssolve = 0
@@ -201,7 +199,11 @@ C       TRANSFORMAR A(1:RANK, 1:RANK) EM R_11
                 write(*,*), A(i,j)
             end do
         end do
-
+        d = 0
+        do i = (rank + 1), n
+            d = d + b(i) ** 2
+            b(i) = 0
+        end do
 C       RESOLVER O SISTEMA
         do j = rank, 1, -1
             b(j) = b(j) / A(j, j)
@@ -209,9 +211,14 @@ C       RESOLVER O SISTEMA
                 b(i) = b(i) - A(i, j) * b(j)
             end do
         end do
-
+        write (*, *) p(1:m)
+        do i = m, 1, -1
+            aux = b(i)
+            b(i) = b(p(i))
+            b(p(i)) = aux
+        end do
         write(*,*), "x = ", b(1:rank)
-
+        write (*, *) "d = ", d
 
         return
         end
